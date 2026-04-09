@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useKPIs } from '../../hooks/useSheets'
+import { useApp } from '../../context/AppContext'
 
 export function KPIPanel() {
   const { kpis, update } = useKPIs()
-  const [editing, setEditing] = useState(null) // { id, value }
+  const { setActiveTab } = useApp()
+  const [editing, setEditing] = useState(null)
 
-  const handleBlur = async () => {
+  const handleBlur = () => {
     if (!editing) return
-    await update(editing.id, editing.value)
+    update(editing.id, editing.value)
     setEditing(null)
   }
 
@@ -37,25 +39,10 @@ export function KPIPanel() {
               padding: '10px 12px',
             }}
           >
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 500,
-                color: 'var(--td-text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                marginBottom: 4,
-              }}
-            >
+            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--td-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
               {kpi.category}
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: 'var(--td-text-muted)',
-                marginBottom: 4,
-              }}
-            >
+            <div style={{ fontSize: 12, color: 'var(--td-text-muted)', marginBottom: 4 }}>
               {kpi.label}
             </div>
             {editing?.id === kpi.id ? (
@@ -101,6 +88,25 @@ export function KPIPanel() {
           </div>
         ))}
       </div>
+
+      <button
+        onClick={() => setActiveTab('kpis')}
+        style={{
+          marginTop: 10,
+          width: '100%',
+          padding: '7px',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--td-burgundy)',
+          fontSize: 12,
+          fontWeight: 500,
+          cursor: 'pointer',
+          textAlign: 'center',
+          fontFamily: 'DM Sans, sans-serif',
+        }}
+      >
+        Ver todos los KPIs →
+      </button>
     </section>
   )
 }
