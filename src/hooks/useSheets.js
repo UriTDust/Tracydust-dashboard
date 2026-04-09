@@ -27,7 +27,12 @@ export function useCollaborators() {
     showToast('Colaborador añadido')
   }
 
-  return { collaborators, workload, create }
+  const remove = (id) => {
+    setCollaborators(prev => prev.filter(c => c.id !== id))
+    showToast('Colaborador eliminado')
+  }
+
+  return { collaborators, workload, create, remove }
 }
 
 export function useKPIs() {

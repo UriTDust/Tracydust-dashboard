@@ -1,24 +1,31 @@
 import { useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Trash2 } from 'lucide-react'
 import { Avatar } from '../ui/Avatar'
 import { useApp } from '../../context/AppContext'
 import { useCollaborators } from '../../hooks/useSheets'
 
 export function CollaboratorPanel() {
   const { activeUser, setActiveUser } = useApp()
-  const { workload, create } = useCollaborators()
+  const { workload, create, remove } = useCollaborators()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ name: '', location: '', role: '', color_hex: '#6B0F1A' })
   const [saving, setSaving] = useState(false)
+  const [hoverId, setHoverId] = useState(null)
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setSaving(true)
-    const initials = form.name.slice(0, 2).toUpperCase()
-    await create({ ...form, avatar_initials: initials })
+    create({ ...form, avatar_initials: form.name.slice(0, 2).toUpperCase() })
     setForm({ name: '', location: '', role: '', color_hex: '#6B0F1A' })
     setShowForm(false)
     setSaving(false)
+  }
+
+  const handleDelete = (e, c) => {
+    e.stopPropagation()
+    if (!window.confirm(`¿Eliminar a ${c.name} como colaborador?`)) return
+    if (activeUser === c.name) setActiveUser(null)
+    remove(c.id)
   }
 
   return (
@@ -40,57 +47,83 @@ export function CollaboratorPanel() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {workload.map(c => {
           const isActive = activeUser === c.name
+          const isHover  = hoverId === c.id
           return (
-            <button
+            <div
               key={c.id}
-              onClick={() => setActiveUser(isActive ? null : c.name)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '8px 10px',
-                borderRadius: 8,
-                border: `1px solid ${isActive ? 'var(--td-burgundy)' : 'var(--td-border)'}`,
-                background: isActive ? 'var(--td-cream)' : 'transparent',
-                cursor: 'pointer',
-                textAlign: 'left',
-                transition: 'all 0.12s',
-                width: '100%',
-              }}
-              onMouseEnter={e => {
-                if (!isActive) e.currentTarget.style.background = 'var(--td-cream-soft)'
-              }}
-              onMouseLeave={e => {
-                if (!isActive) e.currentTarget.style.background = 'transparent'
-              }}
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setHoverId(c.id)}
+              onMouseLeave={() => setHoverId(null)}
             >
-              <Avatar
-                initials={c.avatar_initials || c.name.slice(0, 2).toUpperCase()}
-                color={c.color_hex || '#6B0F1A'}
-                size={32}
-              />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--td-text-primary)' }}>
-                  {c.name}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--td-text-muted)', marginTop: 1 }}>
-                  {c.location} · {c.role}
-                </div>
-              </div>
-              <span
+              <button
+                onClick={() => setActiveUser(isActive ? null : c.name)}
                 style={{
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: c.taskCount > 0 ? 'var(--td-burgundy)' : 'var(--td-text-muted)',
-                  background: c.taskCount > 0 ? '#F9E8EA' : 'var(--td-cream)',
-                  borderRadius: 10,
-                  padding: '2px 7px',
-                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 10px',
+                  paddingRight: isHover ? 36 : 10,
+                  borderRadius: 8,
+                  border: `1px solid ${isActive ? 'var(--td-burgundy)' : 'var(--td-border)'}`,
+                  background: isActive ? 'var(--td-cream)' : isHover ? 'var(--td-cream-soft)' : 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.12s',
+                  width: '100%',
                 }}
               >
-                {c.taskCount}
-              </span>
-            </button>
+                <Avatar
+                  initials={c.avatar_initials || c.name.slice(0, 2).toUpperCase()}
+                  color={c.color_hex || '#6B0F1A'}
+                  size={32}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--td-text-primary)' }}>
+                    {c.name}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--td-text-muted)', marginTop: 1 }}>
+                    {c.location} · {c.role}
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: c.taskCount > 0 ? 'var(--td-burgundy)' : 'var(--td-text-muted)',
+                    background: c.taskCount > 0 ? '#F9E8EA' : 'var(--td-cream)',
+                    borderRadius: 10,
+                    padding: '2px 7px',
+                    flexShrink: 0,
+                  }}
+                >
+                  {c.taskCount}
+                </span>
+              </button>
+
+              {/* Botón eliminar — aparece al hacer hover */}
+              {isHover && (
+                <button
+                  onClick={(e) => handleDelete(e, c)}
+                  title="Eliminar colaborador"
+                  style={{
+                    position: 'absolute',
+                    right: 6,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#DC2626',
+                    padding: 4,
+                    borderRadius: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
+            </div>
           )
         })}
       </div>
@@ -98,9 +131,9 @@ export function CollaboratorPanel() {
       {showForm ? (
         <form onSubmit={handleSubmit} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
-            { key: 'name', placeholder: 'Nombre *', required: true },
+            { key: 'name',     placeholder: 'Nombre *', required: true },
             { key: 'location', placeholder: 'Ciudad' },
-            { key: 'role', placeholder: 'Rol' },
+            { key: 'role',     placeholder: 'Rol' },
           ].map(({ key, placeholder, required }) => (
             <input
               key={key}
