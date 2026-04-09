@@ -4,15 +4,10 @@ import { useApp } from '../../context/AppContext'
 import { useTasks } from '../../hooks/useSheets'
 
 const PHASES = [
-  'Diagnosis',
-  'Vision and objectives',
-  'Product development',
-  'Supplier sourcing',
-  'Prototype',
-  'Branding',
-  'Marketing pre-launch',
+  'Marketing',
+  'Sales',
+  'Finance',
   'Production',
-  'Launch',
 ]
 
 const EMPTY_FORM = {

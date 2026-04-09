@@ -8,9 +8,9 @@ const DEFAULT_COLLABORATORS = [
 ]
 
 const DEFAULT_KPIS = [
-  { id: '1', category: 'Product Development', label: 'Designs',      value: '2/5',     updated_at: '' },
-  { id: '2', category: 'Marketing Growth',    label: 'IG followers', value: '0 → 450', updated_at: '' },
-  { id: '3', category: 'Business',            label: 'CAC target',   value: '€25',     updated_at: '' },
+  { id: '1', category: 'Ventas',           label: 'Ventas semanales en pares de botas', value: '0',      updated_at: '', ig_objetivo: 0 },
+  { id: '2', category: 'Marketing Growth', label: 'Seguidores en Instagram',            value: '0',      updated_at: '', ig_objetivo: 450 },
+  { id: '3', category: 'Business',         label: 'Proveedores contactados',            value: '0',      updated_at: '' },
 ]
 
 const DEFAULT_PROD_KPIS = {

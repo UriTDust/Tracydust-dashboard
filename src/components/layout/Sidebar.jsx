@@ -3,15 +3,10 @@ import { CollaboratorPanel } from '../collaboration/CollaboratorPanel'
 import { useApp } from '../../context/AppContext'
 
 const PHASES = [
-  'Diagnosis',
-  'Vision and objectives',
-  'Product development',
-  'Supplier sourcing',
-  'Prototype',
-  'Branding',
-  'Marketing pre-launch',
+  'Marketing',
+  'Sales',
+  'Finance',
   'Production',
-  'Launch',
 ]
 
 export function Sidebar() {

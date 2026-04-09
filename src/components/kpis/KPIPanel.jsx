@@ -1,17 +1,26 @@
-import { useState } from 'react'
-import { useKPIs } from '../../hooks/useSheets'
+import { useKPIs, useProdKPIs, useFinKPIs } from '../../hooks/useSheets'
 import { useApp } from '../../context/AppContext'
 
 export function KPIPanel() {
-  const { kpis, update } = useKPIs()
   const { setActiveTab } = useApp()
-  const [editing, setEditing] = useState(null)
+  const { kpis }         = useKPIs()
+  const { prodKPIs }     = useProdKPIs()
+  const { finKPIs }      = useFinKPIs()
 
-  const handleBlur = () => {
-    if (!editing) return
-    update(editing.id, editing.value)
-    setEditing(null)
-  }
+  // Seguidores IG desde kpis array (id '2')
+  const igKpi       = kpis.find(k => k.id === '2')
+  const igValue     = parseFloat(igKpi?.value) || 0
+  const igObjetivo  = parseFloat(igKpi?.ig_objetivo) || 450
+  const igPct       = igObjetivo > 0 ? Math.min(100, Math.round((igValue / igObjetivo) * 100)) : 0
+
+  const beneficioSemana = finKPIs.facturacion_semana - finKPIs.gastos_semana
+
+  const items = [
+    { label: "LP's Hechas",      value: prodKPIs.lps_hechas,              suffix: '' },
+    { label: "OBV's Totales",    value: prodKPIs.obv_totales,             suffix: '' },
+    { label: 'Facturación',      value: `${finKPIs.facturacion_acumulada} €`, suffix: '' },
+    { label: 'Beneficio semana', value: `${beneficioSemana} €`,           suffix: '' },
+  ]
 
   return (
     <section style={{ padding: '16px 20px' }}>
@@ -28,65 +37,50 @@ export function KPIPanel() {
       >
         KPIs
       </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {kpis.map(kpi => (
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {items.map(item => (
           <div
-            key={kpi.id}
+            key={item.label}
             style={{
               background: 'var(--td-cream-soft)',
               border: '1px solid var(--td-border)',
               borderRadius: 8,
-              padding: '10px 12px',
+              padding: '8px 12px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <div style={{ fontSize: 10, fontWeight: 500, color: 'var(--td-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
-              {kpi.category}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--td-text-muted)', marginBottom: 4 }}>
-              {kpi.label}
-            </div>
-            {editing?.id === kpi.id ? (
-              <input
-                autoFocus
-                value={editing.value}
-                onChange={e => setEditing({ ...editing, value: e.target.value })}
-                onBlur={handleBlur}
-                onKeyDown={e => e.key === 'Enter' && handleBlur()}
-                style={{
-                  width: '100%',
-                  border: '1px solid var(--td-burgundy)',
-                  borderRadius: 4,
-                  padding: '3px 6px',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  fontFamily: 'DM Sans, sans-serif',
-                  color: 'var(--td-burgundy)',
-                  background: 'var(--td-white)',
-                  outline: 'none',
-                }}
-              />
-            ) : (
-              <div
-                onClick={() => setEditing({ id: kpi.id, value: kpi.value })}
-                title="Click para editar"
-                style={{
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: 'var(--td-burgundy)',
-                  cursor: 'pointer',
-                  borderRadius: 4,
-                  padding: '2px 4px',
-                  margin: '-2px -4px',
-                  transition: 'background 0.1s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--td-cream)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                {kpi.value}
-              </div>
-            )}
+            <span style={{ fontSize: 12, color: 'var(--td-text-muted)' }}>{item.label}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--td-burgundy)', fontFamily: 'DM Sans, sans-serif' }}>
+              {item.value}{item.suffix}
+            </span>
           </div>
         ))}
+
+        {/* Seguidores IG con barra */}
+        <div
+          style={{
+            background: 'var(--td-cream-soft)',
+            border: '1px solid var(--td-border)',
+            borderRadius: 8,
+            padding: '8px 12px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+            <span style={{ fontSize: 12, color: 'var(--td-text-muted)' }}>Seguidores IG</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--td-burgundy)', fontFamily: 'DM Sans, sans-serif' }}>
+              {igValue}
+            </span>
+          </div>
+          <div style={{ background: 'var(--td-border)', borderRadius: 3, height: 4, overflow: 'hidden' }}>
+            <div style={{ width: `${igPct}%`, height: '100%', background: 'var(--td-gold)', borderRadius: 3, transition: 'width 0.3s' }} />
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--td-text-muted)', marginTop: 3, textAlign: 'right' }}>
+            {igPct}% de {igObjetivo}
+          </div>
+        </div>
       </div>
 
       <button

@@ -38,8 +38,15 @@ export function useCollaborators() {
 export function useKPIs() {
   const { kpis, setKpis, showToast } = useApp()
 
-  const update = (id, value) => {
-    setKpis(prev => prev.map(k => k.id === id ? { ...k, value, updated_at: new Date().toISOString() } : k))
+  // updateKPI(id, value)  — actualiza valor de texto
+  // updateKPI(id, value, igObjetivo)  — también actualiza objetivo IG
+  const update = (id, value, igObjetivo) => {
+    setKpis(prev => prev.map(k => {
+      if (k.id !== id) return k
+      const updated = { ...k, value, updated_at: new Date().toISOString() }
+      if (igObjetivo !== undefined) updated.ig_objetivo = igObjetivo
+      return updated
+    }))
     showToast('KPI actualizado')
   }
 
